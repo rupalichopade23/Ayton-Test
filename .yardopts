@@ -1,0 +1,1 @@
+--no-private --plugin activesupport-concern --protected lib/**/*.rb - README.md

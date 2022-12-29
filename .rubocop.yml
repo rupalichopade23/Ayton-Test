@@ -1,0 +1,66 @@
+AllCops:
+  DisplayCopNames: true
+  Include:
+    - "Gemfile"
+    - "Rakefile"
+    - "bin/*"
+    - "*.gemspec"
+    - "lib/**/*.rb"
+    - "test/**/*.rb"
+    - "spec/**/*.rb"
+  Exclude:
+    - "packer/*/cookbooks/**/*"
+    - "**/Vagrantfile"
+
+Metrics/ClassLength:
+  Max: 500
+  Exclude:
+    - "test/**/*"
+    - "spec/**/*"
+
+Metrics/ModuleLength:
+  Max: 500
+  Exclude:
+    - "test/**/*"
+    - "spec/**/*"
+
+Metrics/MethodLength:
+  Max: 40
+  Exclude:
+    - "test/**/*"
+    - "spec/**/*"
+
+Metrics/BlockLength:
+  Max: 500
+  Exclude:
+    - "test/**/*"
+    - "spec/**/*"
+
+Performance/Casecmp:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: '()'
+    '%i':    '()'
+    '%w':    '()'
+
+Style/FileName:
+  Exclude:
+    - "**/Berksfile"
+    - "**/Guardfile"
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/Next:
+  Enabled: false

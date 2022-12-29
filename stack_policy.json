@@ -1,0 +1,26 @@
+{
+  "Statement": [
+    {
+      "Effect" : "Deny",
+      "Principal" : "*",
+      "Action" : "Update:Replace",
+      "Resource" : "*",
+      "Condition" : {
+        "StringEquals" : {
+          "ResourceType" : [
+            "AWS::Cognito::UserPoolUser",
+            "AWS::RDS::DBCluster",
+            "AWS::RDS::DBInstance",
+            "AWS::Redshift::Cluster"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": "Update:*",
+      "Principal": "*",
+      "Resource": "*"
+    }
+  ]
+}
