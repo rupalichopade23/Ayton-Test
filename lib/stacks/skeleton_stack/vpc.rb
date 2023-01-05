@@ -19,6 +19,8 @@ module Concerns
           r.property(:traffic_type) { "ALL" }
           r.property(:resource_id) { skeleton.vpc.ref }
         end
+        ## subnets for webserver
+        
       end
     end
   end

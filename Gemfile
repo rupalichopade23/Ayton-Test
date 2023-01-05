@@ -4,6 +4,8 @@ source "https://#{ENV["FURY_AUTH"]}@gem.fury.io/halloumi/" do
   gem "halloumi-filters", "~> 0.0"
   gem "halloumi-flowlog", "~> 0.0"
   gem "halloumi-resources-compound", "~> 0.7"
+  gem "halloumi-tasks-lambda", "~> 0.4"
+
 end
 
 source "https://rubygems.org" do

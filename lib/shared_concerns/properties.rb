@@ -84,6 +84,15 @@ module Concerns
                  env: :SKELETON_VPC_CIDR_BLOCK,
                  default: "10.0.0.0/16",
                  required: true
+        property :vpc_public_subnet,
+        filter: Halloumi::Filters.string_to_array,
+        env: :VPC_PUBLIC_SUBNETS,
+        required: true
+        property :web_user_data,
+                 template: File.expand_path(
+          "../../templates/userdata.sh.erb",
+          __dir__
+        )
       end
     end
   end

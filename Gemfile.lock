@@ -146,6 +146,10 @@ GEM
       rugged (>= 0.23, < 0.99.0)
       yard (~> 0.8)
       yard-activesupport-concern (~> 0.0)
+    halloumi-tasks-lambda (0.4.4)
+      aws-sdk-v1 (~> 1.66)
+      halloumi-tasks (~> 0.0)
+      rubyzip (~> 1.1)
     hashie (3.6.0)
     hitimes (2.0.0)
     httparty (0.20.0)
@@ -304,6 +308,7 @@ DEPENDENCIES
   halloumi-filters (~> 0.0)!
   halloumi-flowlog (~> 0.0)!
   halloumi-resources-compound (~> 0.7)!
+  halloumi-tasks-lambda (~> 0.4)!
   pry!
   rake!
   rspec (~> 3.2)!
