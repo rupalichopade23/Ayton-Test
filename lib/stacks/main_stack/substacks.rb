@@ -28,7 +28,13 @@ module Concerns
           r.property(:template_url) do
           "#{ENV["STACK_NAME"]}-lambda-stack.json"
           end
-           
+          r.property(:parameters) do
+            {
+              SkeletonVpcId: skeleton_stack.ref_output_SkeletonVpcId,
+              SkeletonInternetGatewayId: skeleton_stack.ref_output_SkeletonInternetGatewayId,
+              SkeletonRouteTableId: skeleton_stack.ref_output_SkeletonRouteTableId
+            }
+          end 
         end
       end
     end

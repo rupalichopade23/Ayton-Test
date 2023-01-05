@@ -1,11 +1,8 @@
 module Concerns
-    module LambdaAddParameter
-      module Parameters
+  module LambdaAddParameter
+    module Parameters
       extend ActiveSupport::Concern
       included do
-        property :lambda_ec2,
-                 env: :LAMBDA_LAMBDA_EC2,
-                 required: true
         property :lambda_ec2,
                  env: :LAMBDA_LAMBDA_EC2,
                  required: true
@@ -50,9 +47,9 @@ module Concerns
           end
           
         end
-        resource :lambda,
+        resource :lambdas,
                  type: Halloumi::AWS::Lambda::Function do |r|
-          r.property(:handler) { "index.handler" }
+          r.property(:handler) { "index.lambda_handler" }
           r.property(:timeout) { 180 }
           r.property(:runtime) { "python3.9" }
           r.property(:code) do
@@ -62,14 +59,17 @@ module Concerns
             }
           end
           r.property(:role) { lambda_role.ref_arn }
-          # r.property(:environment) do
-          #   {
-          #     "Variables": {
-          #       "ENVIRONMENT": stack_name,
-          #       "SOURCE_HOST": "rds-#{stack_name}.#{hosted_zone_name}",
-          #       "SECRETNAME": db_secret_name
-          #     }
-          #   }
-          # end
+          r.property(:environment) do
+            {
+              "Variables": {
+                "ENVIRONMENT": stack_name,
+                "PARAMETER_NAME": "/#{stack_name}/countscript/run"
+              }
+            }
+          end
           
         end
+      end
+    end
+  end
+end
