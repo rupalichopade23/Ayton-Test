@@ -93,6 +93,9 @@ module Concerns
           "../../templates/userdata.sh.erb",
           __dir__
         )
+        property :parameter_name,
+        env: :PARAMETER_NAME,
+        required: true
       end
     end
   end

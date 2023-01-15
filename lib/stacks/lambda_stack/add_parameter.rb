@@ -3,6 +3,11 @@ module Concerns
     module Parameters
       extend ActiveSupport::Concern
       included do
+        property :code,
+                 template: File.expand_path(
+                  "../../../lambda/lambda_ec2/index.py",
+                  __dir__
+                 )
         property :lambda_ec2,
                  env: :LAMBDA_LAMBDA_EC2,
                  required: true
@@ -58,12 +63,13 @@ module Concerns
               "S3Key": lambda_ec2
             }
           end
+         # r.property(:code) { code }
           r.property(:role) { lambda_role.ref_arn }
           r.property(:environment) do
             {
               "Variables": {
                 "ENVIRONMENT": stack_name,
-                "PARAMETER_NAME": "/#{stack_name}/countscript/run"
+                "PARAMETER_NAME": "/#{stack_name}/#{parameter_name}"
               }
             }
           end
