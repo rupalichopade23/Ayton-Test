@@ -110,9 +110,9 @@ module Concerns
                   #   '[[ ! -z  "$PARAM" ]] && aws ssm delete-parameter --name "parameter_name" --region eu-central-1 && /home/ec2-user/scripts/hello.sh'
                   #   }
                     run_count_script: {
-                      command: "PARAM=$(aws ssm get-parameter --name #{parameter_name} --region eu-central-1" \
+                      command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}#{parameter_name} --region eu-central-1" \
                       '| jq -r ".Parameter.Name");' \
-                      "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name #{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+                      "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name /#{stack_name}#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
                       }
                 },
                 files: {
