@@ -69,7 +69,7 @@ module Concerns
             {
               "Variables": {
                 "ENVIRONMENT": stack_name,
-                "PARAMETER_NAME": "/#{stack_name}#{parameter_name}"
+                "PARAMETER_NAME": "/#{stack_name}/#{parameter_name}"
               }
             }
           end

@@ -15,9 +15,48 @@ module Concerns
             "hello.sh.erb",
           __FILE__
             )
+        property :setup_SQL,
+                  template: File.expand_path(
+                   "../../../../config/" \
+            "hello.sql",
+          __FILE__
+            )
         def with_rds_cloning
-          1
+          0
         end
+        
+        def count_script_yn
+          params = {}
+          unless with_rds_cloning.zero?
+            params = {
+              '/opt/count/hello.sh' => {
+                mode: '000755',
+                owner: :root,
+                group: :root,
+                content: setup_HelloWorld
+              },
+              '/opt/count/hello.sql' => {
+                mode: '000755',
+                owner: :root,
+                group: :root,
+                content: "setup_SQL"
+              }
+            }
+          end
+          params # return
+        end
+        def count_script_exe_yn
+          param = {}
+          unless with_rds_cloning.zero?
+            param = { run_count_script:
+            "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1" \
+                    '| jq -r ".Parameter.Name");' \
+                    "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+                }
+          end
+          param # return
+        end
+
         resource :web_security_groups,
                   type: Halloumi::AWS::EC2::SecurityGroup do |r|
           r.property(:group_description) { "Web SG" }
@@ -63,7 +102,6 @@ module Concerns
           r.resource(:vpc_gateway_attachments) do
             skeleton.vpc_gateway_attachments
           end
-        
         end
         def setup_instance_policy
           [
@@ -72,7 +110,7 @@ module Concerns
 
                 "ssm:GetParameter",
                 "ssm:DeleteParameter"
-                
+
               ],
 
               Effect: :Allow,
@@ -93,7 +131,7 @@ module Concerns
         #   r.property(:key_name) { web_key_pair.ref }
         #   r.property(:user_data) do
         #     { 'Fn::Base64': web_user_data
-                
+
         #     }
         #   end
         # end
@@ -105,26 +143,19 @@ module Concerns
               config: {
                 commands: {
                   # run_count_script: {
-                  #   command: 'PARAM=$(aws ssm get-parameter --name "parameter_name" --region eu-central-1' \
-                  #   '| jq -r ".Parameter.Name");' \
-                  #   '[[ ! -z  "$PARAM" ]] && aws ssm delete-parameter --name "parameter_name" --region eu-central-1 && /home/ec2-user/scripts/hello.sh'
-                  #   }
-                    run_count_script: {
-                      command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}#{parameter_name} --region eu-central-1" \
-                      '| jq -r ".Parameter.Name");' \
-                      "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name /#{stack_name}#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
-                      }
-                },
-                files: {
-
-                    "[[ #{with_rds_cloning} -eq 1 ]] && '/opt/count/hello.sh'" => {
-                      mode: '000755',
-                      owner: :root,
-                      group: :root,
-                      content: setup_HelloWorld
-                    }
-                
-                }
+                    
+                    # command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1" \
+                    # '| jq -r ".Parameter.Name");' \
+                    # "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+                  #}
+                }.merge(count_script_exe_yn),
+                files: {}.merge(count_script_yn)
+                    # "[[ #{with_rds_cloning} -eq 1 ]] && '/opt/count/hello.sh'" => {
+                    #   mode: '000755',
+                    #   owner: :root,
+                    #   group: :root,
+                    #   content: setup_HelloWorld
+                    # }
               }
             }
           end
@@ -134,7 +165,7 @@ module Concerns
           r.property(:key_name) { web_key_pair.ref }
           r.property(:max_size) { 2 }
           r.property(:min_size) { 1 }
-        #  r.property(:ebs_size) { 8 }
+         #  r.property(:ebs_size) { 8 }
           r.resource(:skeletons) { setup_skeletons }
           r.property(:service_ip_offset) { 2 }
           r.property(:instance_policies) { setup_instance_policy }
