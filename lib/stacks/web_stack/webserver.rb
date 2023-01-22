@@ -21,8 +21,25 @@ module Concerns
             "hello.sql",
           __FILE__
             )
+        property :alarm_email_addresses,
+                  filter: Halloumi::Filters.string_to_array,
+                  required: true,
+                  env: :ALARM_EMAIL_ADDRESSES
+        resource :custom_sns_topics,
+                  type: Halloumi::AWS::SNS::Topic do |r|
+        
+          r.property(:subscription) do
+            alarm_email_addresses.map do |address|
+              {
+                "Endpoint": address,
+                "Protocol": "email"
+              }
+            
+            end
+          end
+        end
         def with_rds_cloning
-          0
+          1
         end
         
         def count_script_yn
@@ -48,11 +65,13 @@ module Concerns
         def count_script_exe_yn
           param = {}
           unless with_rds_cloning.zero?
-            param = { run_count_script:
-            "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1" \
+            param = { 
+              run_count_script: {
+                command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1" \
                     '| jq -r ".Parameter.Name");' \
-                    "[[ #{with_rds_cloning} -eq 1 ]] && [[ ! -z  \"$PARAM\" ]] && aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
-                }
+                    "[[ ! -z  \"$PARAM\" ]] && aws sns publish --target-arn #{custom_sns_topic.ref} --message 'Count Script Execution Started!' --region eu-central-1 && aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+              }
+            }
           end
           param # return
         end
@@ -109,8 +128,8 @@ module Concerns
               Action: [
 
                 "ssm:GetParameter",
-                "ssm:DeleteParameter"
-
+                "ssm:DeleteParameter",
+                "sns:Publish"
               ],
 
               Effect: :Allow,
@@ -118,24 +137,7 @@ module Concerns
             }
           ]
         end
-        # resource :web_servers,
-        #           type: Halloumi::AWS::EC2::Instance do |r|
-        #   r.property(:image_id) { image_id }
-        #   r.property(:instance_type) { "t2.micro" }
-        #   r.property(:security_group_ids) do
-        #     [
-        #         web_security_group.ref 
-        #     ]
-        #   end
-        #   r.property(:subnet_id) { web_subnet.ref }
-        #   r.property(:key_name) { web_key_pair.ref }
-        #   r.property(:user_data) do
-        #     { 'Fn::Base64': web_user_data
-
-        #     }
-        #   end
-        # end
-
+        
         resource :tenant_setups,
                   type: Halloumi::AutoScaling do |r|
           r.metadata('AWS::CloudFormation::Init') do
