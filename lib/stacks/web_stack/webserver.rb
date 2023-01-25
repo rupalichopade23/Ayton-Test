@@ -25,7 +25,7 @@ module Concerns
                   filter: Halloumi::Filters.string_to_array,
                   required: true,
                   env: :ALARM_EMAIL_ADDRESSES
-        resource :custom_sns_topics,
+        resource :count_script_sns_topics,
                   type: Halloumi::AWS::SNS::Topic do |r|
         
           r.property(:subscription) do
@@ -38,6 +38,8 @@ module Concerns
             end
           end
         end
+        output(:count_script_sns_topics,"test"){ |r| r.ref}
+        
         def with_rds_cloning
           1
         end
@@ -67,9 +69,13 @@ module Concerns
           unless with_rds_cloning.zero?
             param = { 
               run_count_script: {
-                command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1" \
-                    '| jq -r ".Parameter.Name");' \
-                    "[[ ! -z  \"$PARAM\" ]] && aws sns publish --target-arn #{custom_sns_topic.ref} --message 'Count Script Execution Started!' --region eu-central-1 && aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+                # rubocop:disable Metrics/LineLength
+                command: "PARAM=$(aws ssm get-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 | jq -r '.Parameter.Name');" \
+                  "SNS_ARN=$(aws sns list-topics --region eu-central-1 | jq -r '.Topics[] | select(.TopicArn | contains(\"CountScript\")) | .TopicArn');" \
+                  "[[ ! -z  \"$PARAM\" ]] &&" \
+                  "aws sns publish --topic-arn \"$SNS_ARN\" --message 'Count Script Execution Started!' --region eu-central-1 &&" \
+                  "aws ssm delete-parameter --name /#{stack_name}/#{parameter_name} --region eu-central-1 && /opt/count/hello.sh"
+                # rubocop:enable Metrics/LineLength
               }
             }
           end
@@ -129,7 +135,8 @@ module Concerns
 
                 "ssm:GetParameter",
                 "ssm:DeleteParameter",
-                "sns:Publish"
+                "sns:Publish",
+                "sns:ListTopics"
               ],
 
               Effect: :Allow,
